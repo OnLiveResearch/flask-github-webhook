@@ -56,7 +56,7 @@ def index():
 if __name__ == "__main__":
     try:
         port_number = int(sys.argv[1])
-    except:
+    except ValueError:
         port_number = 80
     is_dev = os.environ.get('ENV', None) == 'dev'
     if os.environ.get('USE_PROXYFIX', None) == 'true':
