@@ -33,11 +33,9 @@ def index():
     if repo and repo.get('path', None):
         if repo.get('action', None):
             for action in repo['action']:
-                subprocess.Popen(action,
-                                 cwd=repo['path'])
+                run_command(action, repo['path'])
         else:
-            subprocess.Popen(["git", "pull", "origin", "master"],
-                             cwd=repo['path'])
+            git_pull(repo['path'])
     return 'OK'
 
 
@@ -82,6 +80,13 @@ def find_repo(payload):
     if repo is None:
         repo = repos.get('{owner}/{name}'.format(**repo_meta), None)
     return repo
+
+
+def run_command(command, path):
+    return subprocess.Popen(command, cwd=path)
+
+def git_pull(path):
+    return subprocess.Popen(["git", "pull", "origin", "master"], cwd=path)
 
 
 if __name__ == "__main__":
