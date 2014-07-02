@@ -11,6 +11,8 @@ from flask import Flask, request, abort
 
 app = Flask(__name__)
 
+repos_cache = None
+
 
 HI_MSG = json.dumps({'msg': 'Hi!'})
 WRONG_EVENT_TYPE_MSG = json.dumps({'msg': "wrong event type"})
@@ -63,7 +65,11 @@ def is_push_event(request):
 
 
 def get_repos():
-    return json.loads(io.open('repos.json', 'r').read())
+    global repos_cache
+    if not repos_cache:
+        repos_cache = json.loads(io.open('repos.json', 'r').read())
+
+    return repos_cache
 
 
 def find_repo(payload):
