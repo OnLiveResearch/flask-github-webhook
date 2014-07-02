@@ -30,12 +30,8 @@ def index():
 
     repo = find_repo(payload)
 
-    if repo and repo_has_path(repo):
-        if repo_has_action(repo):
-            for action in repo['action']:
-                run_command(action, repo['path'])
-        else:
-            git_pull(repo['path'])
+    run_actions_for_repo(repo)
+
     return 'OK'
 
 
@@ -58,11 +54,14 @@ def get_ip_blocks_from_github():
 def is_ping_event(request):
     return request.headers.get('X-GitHub-Event') == "ping"
 
+
 def is_push_event(request):
     return request.headers.get('X-GitHub-Event') == "push"
 
+
 def get_repos():
     return json.loads(io.open('repos.json', 'r').read())
+
 
 def find_repo(payload):
     repos = get_repos()
@@ -94,8 +93,18 @@ def git_pull(path):
 def repo_has_path(repo):
     return 'path' in repo
 
+
 def repo_has_action(repo):
     return repo.get('action', None)
+
+
+def run_actions_for_repo(repo):
+    if repo and repo_has_path(repo):
+        if repo_has_action(repo):
+            for action in repo['action']:
+                run_command(action, repo['path'])
+        else:
+            git_pull(repo['path'])
 
 
 if __name__ == "__main__":
