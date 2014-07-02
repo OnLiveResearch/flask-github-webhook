@@ -30,6 +30,9 @@ def index():
 
     repo = find_repo(payload)
 
+    if not repo:
+        abort(404)
+
     run_actions_for_repo(repo)
 
     return OK_MSG
