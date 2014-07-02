@@ -14,15 +14,8 @@ app = Flask(__name__)
 
 @app.route("/", methods=['POST'])
 def index():
-    # Store the IP address blocks that github uses for hook requests.
-    hook_blocks = requests.get('https://api.github.com/meta').json()['hooks']
 
-    # Check if the POST request if from github.com
-    for block in hook_blocks:
-        ip = ipaddress.ip_address(u'%s' % request.remote_addr)
-        if ipaddress.ip_address(ip) in ipaddress.ip_network(block):
-            break  # the remote_addr is within the network range of github
-    else:
+    if not is_ip_from_github(request.remote_addr):
         abort(403)
 
     if request.headers.get('X-GitHub-Event') == "ping":
@@ -53,6 +46,23 @@ def index():
             subprocess.Popen(["git", "pull", "origin", "master"],
                              cwd=repo['path'])
     return 'OK'
+
+
+def is_ip_from_github(remote_addr):
+    for block in get_ip_blocks_from_github():
+        if is_ip_in_block(remote_addr, block):
+            return True
+    return False
+
+
+def is_ip_in_block(ip, block):
+    ip = ipaddress.ip_address(u'%s' % ip)
+    return ipaddress.ip_address(ip) in ipaddress.ip_network(block)
+
+
+def get_ip_blocks_from_github():
+    return requests.get('https://api.github.com/meta').json()['hooks']
+
 
 if __name__ == "__main__":
     try:
