@@ -18,7 +18,6 @@ OK_MSG = 'OK'
 
 @app.route("/", methods=['POST'])
 def index():
-
     if not is_ip_from_github(request.remote_addr):
         abort(403)
 
@@ -108,16 +107,27 @@ def run_actions_for_repo(repo):
             git_pull(repo['path'])
 
 
-if __name__ == "__main__":
-    try:
-        port_number = int(sys.argv[1])
-    except ValueError:
-        port_number = 80
+def get_host():
     host = os.environ.get('HOST', '0.0.0.0')
-    is_dev = os.environ.get('ENV', None) == 'dev'
     if os.environ.get('USE_PROXYFIX', None) == 'true':
         from werkzeug.contrib.fixers import ProxyFix
         app.wsgi_app = ProxyFix(app.wsgi_app)
         if host == '0.0.0.0':
             host = '127.0.0.1'
-    app.run(host=host, port=port_number, debug=is_dev)
+    return host
+
+
+def get_port_number():
+    try:
+        return int(sys.argv[1])
+    except ValueError:
+        return 80
+
+
+def is_dev():
+    return os.environ.get('ENV', None) == 'dev'
+
+
+if __name__ == "__main__":
+    app.run(host=get_host(), port=get_port_number(), debug=is_dev())
+
