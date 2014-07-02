@@ -85,8 +85,10 @@ def find_repo(payload):
 def run_command(command, path):
     return subprocess.Popen(command, cwd=path)
 
+
 def git_pull(path):
-    return subprocess.Popen(["git", "pull", "origin", "master"], cwd=path)
+    return run_command(command=["git", "pull", "origin", "master"],
+                       path=path)
 
 
 if __name__ == "__main__":
