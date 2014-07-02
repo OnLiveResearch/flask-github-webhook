@@ -26,7 +26,7 @@ def index():
     if not is_push_event(request):
         return WRONG_EVENT_TYPE_MSG
 
-    repos = json.loads(io.open('repos.json', 'r').read())
+    repos = get_repos()
 
     payload = json.loads(request.data)
     repo_meta = {
@@ -72,6 +72,9 @@ def is_ping_event(request):
 
 def is_push_event(request):
     return request.headers.get('X-GitHub-Event') == "push"
+
+def get_repos():
+    return json.loads(io.open('repos.json', 'r').read())
 
 
 if __name__ == "__main__":
