@@ -12,16 +12,19 @@ from flask import Flask, request, abort
 app = Flask(__name__)
 
 
+HI_MSG = json.dumps({'msg': 'Hi!'})
+WRONG_EVENT_TYPE_MSG = json.dumps({'msg': "wrong event type"})
+
 @app.route("/", methods=['POST'])
 def index():
 
     if not is_ip_from_github(request.remote_addr):
         abort(403)
 
-    if request.headers.get('X-GitHub-Event') == "ping":
-        return json.dumps({'msg': 'Hi!'})
-    if request.headers.get('X-GitHub-Event') != "push":
-        return json.dumps({'msg': "wrong event type"})
+    if is_ping_event(request):
+        return HI_MSG
+    if not is_push_event(request):
+        return WRONG_EVENT_TYPE_MSG
 
     repos = json.loads(io.open('repos.json', 'r').read())
 
@@ -62,6 +65,13 @@ def is_ip_in_block(ip, block):
 
 def get_ip_blocks_from_github():
     return requests.get('https://api.github.com/meta').json()['hooks']
+
+
+def is_ping_event(request):
+    return request.headers.get('X-GitHub-Event') == "ping"
+
+def is_push_event(request):
+    return request.headers.get('X-GitHub-Event') == "push"
 
 
 if __name__ == "__main__":
