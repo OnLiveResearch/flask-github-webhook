@@ -19,14 +19,18 @@ HI_MSG = json.dumps({'msg': 'Hi!'})
 WRONG_EVENT_TYPE_MSG = json.dumps({'msg': "wrong event type"})
 OK_MSG = 'OK'
 
+PING_EVENT = 'ping'
+PUSH_EVENT = 'push'
+
 @app.route("/", methods=['POST'])
 def index():
     if not is_ip_from_github(request.remote_addr):
         abort(403)
 
-    if is_ping_event(request):
+    event = get_event(request)
+    if event == PING_EVENT:
         return HI_MSG
-    if not is_push_event(request):
+    if event != PUSH_EVENT:
         return WRONG_EVENT_TYPE_MSG
 
     payload = json.loads(request.data)
@@ -57,12 +61,8 @@ def get_ip_blocks_from_github():
     return requests.get('https://api.github.com/meta').json()['hooks']
 
 
-def is_ping_event(request):
-    return request.headers.get('X-GitHub-Event') == "ping"
-
-
-def is_push_event(request):
-    return request.headers.get('X-GitHub-Event') == "push"
+def get_event(request):
+    return request.headers.get('X-GitHub-Event')
 
 
 def get_repos():
