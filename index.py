@@ -7,6 +7,7 @@ import json
 import subprocess
 import requests
 import ipaddress
+import signal
 from flask import Flask, request, abort
 
 app = Flask(__name__)
@@ -137,6 +138,19 @@ def is_dev():
     return os.environ.get('ENV', None) == 'dev'
 
 
+def reload_config():
+    global repos_cache
+    repos_cache = None
+    get_repos()
+
+
+def handle_sigusr1(signum, stack):
+    if signum is signal.SIGUSR1:
+        reload_config()
+
+
 if __name__ == "__main__":
+    signal.signal(signal.SIGUSR1, handle_sigusr1)
+
     app.run(host=get_host(), port=get_port_number(), debug=is_dev())
 
