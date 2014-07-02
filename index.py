@@ -14,6 +14,7 @@ app = Flask(__name__)
 
 HI_MSG = json.dumps({'msg': 'Hi!'})
 WRONG_EVENT_TYPE_MSG = json.dumps({'msg': "wrong event type"})
+OK_MSG = 'OK'
 
 @app.route("/", methods=['POST'])
 def index():
@@ -32,7 +33,7 @@ def index():
 
     run_actions_for_repo(repo)
 
-    return 'OK'
+    return OK_MSG
 
 
 def is_ip_from_github(remote_addr):
