@@ -26,20 +26,10 @@ def index():
     if not is_push_event(request):
         return WRONG_EVENT_TYPE_MSG
 
-    repos = get_repos()
-
     payload = json.loads(request.data)
-    repo_meta = {
-        'name': payload['repository']['name'],
-        'owner': payload['repository']['owner']['name'],
-    }
-    match = re.match(r"refs/heads/(?P<branch>.*)", payload['ref'])
-    repo = None
-    if match:
-        repo_meta['branch'] = match.groupdict()['branch']
-        repo = repos.get('{owner}/{name}/branch:{branch}'.format(**repo_meta), None)
-    if repo is None:
-        repo = repos.get('{owner}/{name}'.format(**repo_meta), None)
+
+    repo = find_repo(payload)
+
     if repo and repo.get('path', None):
         if repo.get('action', None):
             for action in repo['action']:
@@ -75,6 +65,22 @@ def is_push_event(request):
 
 def get_repos():
     return json.loads(io.open('repos.json', 'r').read())
+
+def find_repo(payload):
+    repos = get_repos()
+
+    repo_meta = {
+        'name': payload['repository']['name'],
+        'owner': payload['repository']['owner']['name'],
+    }
+
+    match = re.match(r"refs/heads/(?P<branch>.*)", payload['ref'])
+    repo = None
+    if match:
+        repo_meta['branch'] = match.groupdict()['branch']
+        repo = repos.get('{owner}/{name}/branch:{branch}'.format(**repo_meta), None)
+    if repo is None:
+        repo = repos.get('{owner}/{name}'.format(**repo_meta), None)
 
 
 if __name__ == "__main__":
