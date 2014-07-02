@@ -30,8 +30,8 @@ def index():
 
     repo = find_repo(payload)
 
-    if repo and repo.get('path', None):
-        if repo.get('action', None):
+    if repo and repo_has_path(repo):
+        if repo_has_action(repo):
             for action in repo['action']:
                 run_command(action, repo['path'])
         else:
@@ -89,6 +89,13 @@ def run_command(command, path):
 def git_pull(path):
     return run_command(command=["git", "pull", "origin", "master"],
                        path=path)
+
+
+def repo_has_path(repo):
+    return 'path' in repo
+
+def repo_has_action(repo):
+    return repo.get('action', None)
 
 
 if __name__ == "__main__":
