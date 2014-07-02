@@ -81,6 +81,7 @@ def find_repo(payload):
         repo = repos.get('{owner}/{name}/branch:{branch}'.format(**repo_meta), None)
     if repo is None:
         repo = repos.get('{owner}/{name}'.format(**repo_meta), None)
+    return repo
 
 
 if __name__ == "__main__":
