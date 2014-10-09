@@ -92,25 +92,26 @@ def find_repo(payload):
     return repo
 
 
-def run_command(command, path):
-    return subprocess.Popen(command, cwd=path)
+def run_command(command, path, env=None):
+    return subprocess.Popen(command, cwd=path, env=env)
 
 
-def git_pull(path):
+def git_pull(path, env=None):
     return run_command(command=["git", "pull", "origin", "master"],
-                       path=path)
-
-
+                       path=path, env=env)
 
 
 def run_actions_for_repo(repo):
     if repo and 'path' in repo:
+        env = os.environ.copy()
+        env.update(repo.get('env', {}))
+
         actions = repo.get('action', [])
         if actions:
             for action in actions:
-                run_command(action, repo['path'])
+                run_command(action, repo['path'], env=env)
         else:
-            git_pull(repo['path'])
+            git_pull(repo['path'], env=env)
 
 
 def get_host():
