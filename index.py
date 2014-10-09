@@ -24,7 +24,8 @@ PUSH_EVENT = 'push'
 
 @app.route("/", methods=['POST'])
 def index():
-    if not is_ip_from_github(request.remote_addr):
+    if not is_ip_from_github(request.headers.get('X-Real-Ip', None)
+                             or request.remote_addr):
         abort(403)
 
     event = get_event(request)
