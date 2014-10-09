@@ -101,18 +101,13 @@ def git_pull(path):
                        path=path)
 
 
-def repo_has_path(repo):
-    return 'path' in repo
-
-
-def repo_has_action(repo):
-    return repo.get('action', None)
 
 
 def run_actions_for_repo(repo):
-    if repo and repo_has_path(repo):
-        if repo_has_action(repo):
-            for action in repo['action']:
+    if repo and 'path' in repo:
+        actions = repo.get('action', [])
+        if actions:
+            for action in actions:
                 run_command(action, repo['path'])
         else:
             git_pull(repo['path'])
